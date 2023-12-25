@@ -1,7 +1,6 @@
 import 'package:animated_background/animated_background.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import '../helper/ui_helper.dart';
 
