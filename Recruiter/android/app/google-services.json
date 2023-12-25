@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "861420459575",
+    "project_id": "recruiter-64a6b",
+    "storage_bucket": "recruiter-64a6b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:861420459575:android:748ae4a1e75291ec3a91b2",
+        "android_client_info": {
+          "package_name": "com.example.recruiter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfaSvyn_vE7CyScZq5IplJt45Mclg0PmY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
