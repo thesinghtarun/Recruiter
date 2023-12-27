@@ -1,18 +1,18 @@
 import 'package:animated_background/animated_background.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:recruiter/apis/Apis.dart';
 import '../helper/ui_helper.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class ForgetPasswordScreen extends StatefulWidget {
+  const ForgetPasswordScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<ForgetPasswordScreen> createState() => _ForgetPasswordScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen>
+class _ForgetPasswordScreenState extends State<ForgetPasswordScreen>
     with SingleTickerProviderStateMixin {
   bool toHide = true;
   //Animation ke liye code
@@ -30,9 +30,13 @@ class _LoginScreenState extends State<LoginScreen>
   );
 
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
   //Creating firebaseAuth instance
   final FirebaseAuth _mAuth = FirebaseAuth.instance;
+  User? docid = FirebaseAuth.instance.currentUser;
 
 //List of image for automatic image Slideshow
   List<String> imagePaths = [
@@ -100,75 +104,49 @@ class _LoginScreenState extends State<LoginScreen>
                               UiHelper.customTextField(
                                   _emailController, "Email", Icons.mail, false),
                               const SizedBox(
-                                height: 10,
+                                height: 20,
                               ),
-
-                              //Calling customTextField() function from UiHelper class taaki code kam dikhe
-                              UiHelper.customTextField(_passwordController,
-                                  "Password", Icons.lock, true),
-
-                              Container(
-                                alignment: Alignment.topRight,
-                                margin:
-                                    const EdgeInsets.symmetric(vertical: 20),
-                                child: TextButton(
-                                  onPressed: () {
-                                    Navigator.pushReplacementNamed(
-                                        context, "/ForgetPasswordScreen");
-                                  },
-                                  child: const Text(
-                                    "Forget Password?",
-                                    style: TextStyle(
-                                        color: Colors.blueAccent,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18),
-                                  ),
-                                ),
+                              UiHelper.customTextField(_newPasswordController,
+                                  "New Passsword", Icons.lock, true),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              UiHelper.customTextField(
+                                  _confirmPasswordController,
+                                  "Confirm Passsword",
+                                  Icons.lock,
+                                  true),
+                              const SizedBox(
+                                height: 20,
                               ),
                               Row(
                                 children: [
                                   Expanded(
                                       child: ElevatedButton(
-                                          onPressed: () {
+                                          onPressed: () async {
                                             validateEmpty(
-                                                _emailController.text
-                                                    .toString(),
-                                                _passwordController.text
-                                                    .toString());
+                                                _emailController.text,
+                                                _newPasswordController.text,
+                                                _confirmPasswordController
+                                                    .text);
                                           },
-                                          child: const Text("Login"))),
+                                          child: const Text("Reset Password"))),
                                 ],
                               ),
                               const SizedBox(
                                 height: 20,
                               ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Text(
-                                    "Don't have an account",
-                                    style: TextStyle(
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16),
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pushReplacementNamed(
-                                          context, "/SignUpScreen");
-                                    },
-                                    child: const Text(
-                                      "SignUp",
-                                      style: TextStyle(
-                                          color: Colors.blueAccent,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18),
-                                    ),
-                                  ),
-                                ],
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pushReplacementNamed(context, "/");
+                                },
+                                child: const Text(
+                                  "Return to Login",
+                                  style: TextStyle(
+                                      color: Colors.blueAccent,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18),
+                                ),
                               ),
                             ]),
                       ),
@@ -179,38 +157,78 @@ class _LoginScreenState extends State<LoginScreen>
     ));
   }
 
-  Future<void> logIn(String email, String password) async {
+  Future<void> resetPassword() async {
     try {
-      await _mAuth.signInWithEmailAndPassword(email: email, password: password);
+      await _mAuth.sendPasswordResetEmail(email: _emailController.text.trim());
       // ignore: use_build_context_synchronously
-      UiHelper.showSnackbar(context, "User Logged in");
-      // ignore: use_build_context_synchronously
-      Navigator.pushReplacementNamed(context, '/HomeScreen');
-    } catch (e) {
+      UiHelper.showSnackbar(context, "Reset email has been sent");
+    } on FirebaseAuthException catch (e) {
       // ignore: use_build_context_synchronously
       UiHelper.showSnackbar(context, e.toString());
     }
   }
 
   //Validating text fields checking if it is null
-  void validateEmpty(String email, String password) {
+  void validateEmpty(String email, String newPassword, String confirmPassword) {
     if (email == "") {
       UiHelper.showSnackbar(context, "Enter your email id");
-    } else if (password == "") {
-      UiHelper.showSnackbar(context, "Enter Password");
     } else if (!isValidEmail(email)) {
       UiHelper.showSnackbar(context, "Enter valid email");
+    } else if (newPassword == "") {
+      UiHelper.showSnackbar(context, "Password required");
+    } else if (confirmPassword == "") {
+      UiHelper.showSnackbar(context, "Retype Password");
+    } else if (newPassword != confirmPassword) {
+      UiHelper.showSnackbar(context, "Password not matched");
     } else {
-      logIn(_emailController.text.toString(),
-          _passwordController.text.toString());
+      updatePasswordInDb(_newPasswordController.text,
+          _confirmPasswordController.text, _emailController.text, context);
     }
   }
+}
 
-  //Checking email format
-  bool isValidEmail(String email) {
-    // Regular expression for a simple email validation
-    String emailRegex = r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$';
-    RegExp regex = RegExp(emailRegex);
-    return regex.hasMatch(email);
+//Checking email format
+bool isValidEmail(String email) {
+  // Regular expression for a simple email validation
+  String emailRegex = r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$';
+  RegExp regex = RegExp(emailRegex);
+  return regex.hasMatch(email);
+}
+
+//To update password in cloud firestore
+Future<void> updatePasswordInDb(String newPassword, String confirmPassword,
+    String email, BuildContext context) async {
+  await updatePasswordInAuth(newPassword);
+  if (newPassword == confirmPassword) {
+    FirebaseFirestore.instance
+        .collection('User')
+        .where('email', isEqualTo: email)
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      if (querySnapshot.docs.isNotEmpty) {
+        querySnapshot.docs.forEach((doc) {
+          FirebaseFirestore.instance
+              .collection('User')
+              .doc(email)
+              .update({'password': newPassword});
+          print("Password set");
+        });
+        UiHelper.showSnackbar(context, "Password Updated Successfully");
+        Navigator.pushReplacementNamed(context, "/");
+      } else {
+        UiHelper.showSnackbar(context, "Password updation failed");
+      }
+    });
+  }
+}
+
+//Updating password in auth
+Future<void> updatePasswordInAuth(String newPassword) async {
+  try {
+    User user = FirebaseAuth.instance.currentUser!;
+    await user.updatePassword(newPassword);
+    print("Password updated successfully!");
+  } catch (e) {
+    print("Error updating password: $e");
   }
 }

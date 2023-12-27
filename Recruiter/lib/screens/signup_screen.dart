@@ -17,9 +17,9 @@ class _SignUpScreenState extends State<SignUpScreen>
   //List of image for automatic image slideshow
   List<String> imagePaths = [
     'images/login.png',
-    'images/login_logo.png',
+    'images/login13.png',
     'images/login.png',
-    'images/login_logo.png',
+    'images/login13.png',
   ];
   //Animation ke liye code
   ParticleOptions particles = const ParticleOptions(
@@ -218,7 +218,7 @@ class _SignUpScreenState extends State<SignUpScreen>
       String city) async {
     // Call the user's CollectionReference to add a new user
     CollectionReference users = FirebaseFirestore.instance.collection('User');
-    return users.add({
+    return users.doc(email).set({
       'name': name,
       'email': email,
       'password': password,
@@ -226,6 +226,7 @@ class _SignUpScreenState extends State<SignUpScreen>
       'city': city,
     }).then((value) {
       UiHelper.showSnackbar(context, "User Added Successfully");
+      Navigator.pushReplacementNamed(context, "/");
     }).catchError((error) {
       UiHelper.showSnackbar(context, error.toString());
     });

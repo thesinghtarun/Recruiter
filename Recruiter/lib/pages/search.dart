@@ -10,8 +10,8 @@ class Search extends StatefulWidget {
 class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.blueAccent,
+    return const Scaffold(
+      backgroundColor: Color.fromARGB(255, 191, 210, 242),
       body: Center(
         child: Text("Search Page"),
       ),

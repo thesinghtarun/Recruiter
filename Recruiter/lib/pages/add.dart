@@ -10,8 +10,8 @@ class Add extends StatefulWidget {
 class _AddState extends State<Add> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.blueAccent,
+    return const Scaffold(
+      backgroundColor: Color.fromARGB(255, 191, 210, 242),
       body: Center(
         child: Text("Add Page"),
       ),
