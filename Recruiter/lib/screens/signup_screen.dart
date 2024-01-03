@@ -1,5 +1,3 @@
-import 'package:animated_background/animated_background.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,8 +25,8 @@ class _SignUpScreenState extends State<SignUpScreen>
 
   @override
   void dispose() {
-    super.dispose();
     _animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -67,18 +65,14 @@ class _SignUpScreenState extends State<SignUpScreen>
         color: const Color.fromARGB(255, 191, 210, 242),
         child: Stack(children: [
           //automatic image slideshow
-          CachedNetworkImage(
-            imageUrl: "images/bgWallpaper1.jpg",
-            placeholder: (context, url) => Image.asset(
-              "images/bgWallpaper1.jpg",
-              fit: BoxFit.fill,
-            ),
-            errorWidget: (context, url, error) => const Icon(Icons.error),
+          Image.asset(
+            "images/bgWallpaper1.jpg",
             width: double.infinity,
             height: double.infinity,
             fit: BoxFit.cover,
             alignment: FractionalOffset(_animation.value, 0),
           ),
+
           SingleChildScrollView(
             child: Center(
               child: Padding(
@@ -174,7 +168,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                           const Text(
                             "Already have an account",
                             style: TextStyle(
-                                color: Colors.black87,
+                                color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16),
                           ),

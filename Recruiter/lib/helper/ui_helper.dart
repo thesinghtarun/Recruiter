@@ -12,13 +12,12 @@ class UiHelper {
       ],
       decoration: InputDecoration(
         labelText: text,
-        hoverColor: Colors.white,
         prefixIcon: Icon(iconData),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(25),
         ),
         filled: true,
-        fillColor: const Color.fromARGB(73, 124, 180, 199),
+        fillColor: const Color.fromARGB(127, 124, 180, 199),
       ),
     );
   }
@@ -30,14 +29,13 @@ class UiHelper {
       controller: controller,
       obscureText: toHide,
       decoration: InputDecoration(
-        hoverColor: Colors.white,
         labelText: text,
         prefixIcon: Icon(iconData),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(25),
         ),
         filled: true,
-        fillColor: const Color.fromARGB(73, 124, 180, 199),
+        fillColor: const Color.fromARGB(127, 124, 180, 199),
       ),
     );
   }
@@ -57,7 +55,7 @@ class UiHelper {
           borderRadius: BorderRadius.circular(25),
         ),
         filled: true,
-        fillColor: const Color.fromARGB(73, 124, 180, 199),
+        fillColor: const Color.fromARGB(127, 124, 180, 199),
       ),
     );
   }

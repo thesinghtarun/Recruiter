@@ -1,5 +1,3 @@
-import 'package:animated_background/animated_background.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -20,8 +18,8 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen>
 
   @override
   void dispose() {
-    super.dispose();
     _animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -69,18 +67,14 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen>
     return Scaffold(
       body: Stack(children: [
         //automatic image slideshow
-        CachedNetworkImage(
-          imageUrl: "images/bgWallpaper1.jpg",
-          placeholder: (context, url) => Image.asset(
-            "images/bgWallpaper1.jpg",
-            fit: BoxFit.fill,
-          ),
-          errorWidget: (context, url, error) => const Icon(Icons.error),
+        Image.asset(
+          "images/bgWallpaper1.jpg",
           width: double.infinity,
           height: double.infinity,
           fit: BoxFit.cover,
           alignment: FractionalOffset(_animation.value, 0),
         ),
+
         Padding(
           padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
           child: Column(
@@ -90,7 +84,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen>
                 Container(
                   margin: const EdgeInsets.fromLTRB(0, 30, 0, 10),
                   child: const Text(
-                    "Welcome..",
+                    "Forgot Passwoord:(",
                     style: TextStyle(
                         fontSize: 26,
                         color: Colors.white,

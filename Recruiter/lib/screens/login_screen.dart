@@ -1,12 +1,10 @@
-import 'package:animated_background/animated_background.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../helper/ui_helper.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -19,8 +17,8 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   void dispose() {
-    super.dispose();
     _animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -62,18 +60,14 @@ class _LoginScreenState extends State<LoginScreen>
     return Scaffold(
         body: Stack(children: [
       //automatic image slideshow
-      CachedNetworkImage(
-        imageUrl: "images/bgWallpaper1.jpg",
-        placeholder: (context, url) => Image.asset(
-          "images/bgWallpaper1.jpg",
-          fit: BoxFit.fill,
-        ),
-        errorWidget: (context, url, error) => const Icon(Icons.error),
+      Image.asset(
+        "images/bgWallpaper1.jpg",
         width: double.infinity,
         height: double.infinity,
         fit: BoxFit.cover,
         alignment: FractionalOffset(_animation.value, 0),
       ),
+
       SingleChildScrollView(
         child: Center(
           child: Padding(
@@ -103,6 +97,7 @@ class _LoginScreenState extends State<LoginScreen>
                       );
                     }).toList(),
                   ),
+
                   Padding(
                     padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
                     child: Column(
