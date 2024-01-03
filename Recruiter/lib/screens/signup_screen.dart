@@ -1,4 +1,5 @@
 import 'package:animated_background/animated_background.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,25 +22,40 @@ class _SignUpScreenState extends State<SignUpScreen>
     'images/login.png',
     'images/login13.png',
   ];
-  //Animation ke liye code
-  ParticleOptions particles = const ParticleOptions(
-    baseColor: Colors.cyan,
-    spawnOpacity: 0.0,
-    opacityChangeRate: 0.25,
-    minOpacity: 0.1,
-    maxOpacity: 0.4,
-    particleCount: 70,
-    spawnMaxRadius: 15.0,
-    spawnMaxSpeed: 30.0,
-    spawnMinSpeed: 30,
-    spawnMinRadius: 7.0,
-  );
+  late Animation<double> _animation;
+  late AnimationController _animationController;
+
+  @override
+  void dispose() {
+    super.dispose();
+    _animationController.dispose();
+  }
+
+  @override
+  void initState() {
+    _animationController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 20));
+    _animation =
+        CurvedAnimation(parent: _animationController, curve: Curves.linear)
+          ..addListener(() {
+            setState(() {});
+          })
+          ..addStatusListener((animationStatus) {
+            if (animationStatus == AnimationStatus.completed) {
+              _animationController.reset();
+              _animationController.forward();
+            }
+          });
+    _animationController.forward();
+    super.initState();
+  }
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
+  String loginUrlImage = 'images/bgWallpaper1.jpg';
 
   //creating firebaseAuth instance
   final FirebaseAuth _mAuth = FirebaseAuth.instance;
@@ -49,10 +65,21 @@ class _SignUpScreenState extends State<SignUpScreen>
     return Scaffold(
       body: Container(
         color: const Color.fromARGB(255, 191, 210, 242),
-        child: AnimatedBackground(
-          vsync: this,
-          behaviour: RandomParticleBehaviour(options: particles),
-          child: SingleChildScrollView(
+        child: Stack(children: [
+          //automatic image slideshow
+          CachedNetworkImage(
+            imageUrl: "images/bgWallpaper1.jpg",
+            placeholder: (context, url) => Image.asset(
+              "images/bgWallpaper1.jpg",
+              fit: BoxFit.fill,
+            ),
+            errorWidget: (context, url, error) => const Icon(Icons.error),
+            width: double.infinity,
+            height: double.infinity,
+            fit: BoxFit.cover,
+            alignment: FractionalOffset(_animation.value, 0),
+          ),
+          SingleChildScrollView(
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(10, 70, 10, 0),
@@ -84,35 +111,37 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                       //Calling customTextField() function from UiHelper class taaki code kam dikhe
                       UiHelper.customTextField(
-                          _nameController, "Name", Icons.person, false),
+                        _emailController,
+                        "Name",
+                        Icons.person,
+                      ),
                       const SizedBox(
                         height: 10,
                       ),
-
                       //Calling customTextField() function from UiHelper class taaki code kam dikhe
-                      UiHelper.customTextField(
+                      UiHelper.customEmailPasswordTextField(
                           _emailController, "Email", Icons.mail, false),
                       const SizedBox(
                         height: 10,
                       ),
 
                       //Calling customTextField() function from UiHelper class taaki code kam dikhe
-                      UiHelper.customTextField(
+                      UiHelper.customEmailPasswordTextField(
                           _passwordController, "Password", Icons.lock, true),
                       const SizedBox(
                         height: 10,
                       ),
 
                       //Calling customTextField() function from UiHelper class taaki code kam dikhe
-                      UiHelper.customTextField(
-                          _phoneController, "Phone", Icons.phone, false),
+                      UiHelper.customNumericTextField(
+                          _phoneController, "Phone", Icons.phone),
                       const SizedBox(
                         height: 10,
                       ),
 
                       //Calling customTextField() function from UiHelper class taaki code kam dikhe
                       UiHelper.customTextField(
-                          _cityController, "City", Icons.gps_fixed, false),
+                          _cityController, "City", Icons.gps_fixed),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: Row(
@@ -123,11 +152,16 @@ class _SignUpScreenState extends State<SignUpScreen>
                                     //Calling signUp method to create user in firebase authentication
                                     onPressed: () {
                                       validateTextField(
-                                        _nameController.text.toString(),
-                                        _emailController.text.toString(),
-                                        _passwordController.text.toString(),
-                                        _phoneController.text.toString(),
-                                        _cityController.text.toString(),
+                                        _nameController.text.toString().trim(),
+                                        _emailController.text
+                                            .toString()
+                                            .toLowerCase()
+                                            .trim(),
+                                        _passwordController.text
+                                            .toString()
+                                            .trim(),
+                                        _phoneController.text.toString().trim(),
+                                        _cityController.text.toString().trim(),
                                       );
                                     },
                                     child: const Text("Sign Up"))),
@@ -165,7 +199,7 @@ class _SignUpScreenState extends State<SignUpScreen>
               ),
             ),
           ),
-        ),
+        ]),
       ),
     );
   }
@@ -173,7 +207,7 @@ class _SignUpScreenState extends State<SignUpScreen>
 //Checking email format
   bool isValidEmail(String email) {
     // Regular expression for a simple email validation
-    String emailRegex = r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$';
+    String emailRegex = r'^[a-zA-Z_]+[\w-]*@(gmail\.)+[com]';
     RegExp regex = RegExp(emailRegex);
     return regex.hasMatch(email);
   }
@@ -189,6 +223,8 @@ class _SignUpScreenState extends State<SignUpScreen>
       UiHelper.showSnackbar(context, "Enter valid email");
     } else if (password == "") {
       UiHelper.showSnackbar(context, "Password required");
+    } else if (password.length < 8) {
+      UiHelper.showSnackbar(context, "Enter Strong Password(>8 characters)");
     } else if (phone == "") {
       UiHelper.showSnackbar(context, "Phone Number required");
     } else if (phone.length < 10 || phone.length > 10) {

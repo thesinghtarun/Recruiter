@@ -4,7 +4,6 @@ import 'package:recruiter/firebase_options.dart';
 import 'package:recruiter/screens/forget_password_screen.dart';
 import 'package:recruiter/screens/home_screen.dart';
 import 'package:recruiter/screens/signup_screen.dart';
-
 import 'screens/login_screen.dart';
 
 Future<void> main() async {

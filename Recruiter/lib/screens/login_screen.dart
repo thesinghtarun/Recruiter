@@ -1,8 +1,8 @@
 import 'package:animated_background/animated_background.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:recruiter/apis/Apis.dart';
 import '../helper/ui_helper.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -14,23 +14,38 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
-  bool toHide = true;
-  //Animation ke liye code
-  ParticleOptions particles = const ParticleOptions(
-    baseColor: Colors.cyan,
-    spawnOpacity: 0.0,
-    opacityChangeRate: 0.25,
-    minOpacity: 0.1,
-    maxOpacity: 0.4,
-    particleCount: 70,
-    spawnMaxRadius: 15.0,
-    spawnMaxSpeed: 30.0,
-    spawnMinSpeed: 30,
-    spawnMinRadius: 7.0,
-  );
+  late Animation<double> _animation;
+  late AnimationController _animationController;
+
+  @override
+  void dispose() {
+    super.dispose();
+    _animationController.dispose();
+  }
+
+  @override
+  void initState() {
+    _animationController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 20));
+    _animation =
+        CurvedAnimation(parent: _animationController, curve: Curves.linear)
+          ..addListener(() {
+            setState(() {});
+          })
+          ..addStatusListener((animationStatus) {
+            if (animationStatus == AnimationStatus.completed) {
+              _animationController.reset();
+              _animationController.forward();
+            }
+          });
+    _animationController.forward();
+    super.initState();
+  }
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  String loginUrlImage = 'images/bgWallpaper1.jpg';
+
   //Creating firebaseAuth instance
   final FirebaseAuth _mAuth = FirebaseAuth.instance;
 
@@ -45,138 +60,149 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(
-      color: const Color.fromARGB(255, 191, 210, 242),
-      child: AnimatedBackground(
-          vsync: this,
-          behaviour: RandomParticleBehaviour(options: particles),
-          child: SingleChildScrollView(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 70, 10, 0),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      //automatic image slideshow
-                      CarouselSlider(
-                        options: CarouselOptions(
-                          height: MediaQuery.of(context).size.height /
-                              5, // Set half the screen height
-                          autoPlay: true,
-                          enlargeCenterPage: true,
-                          aspectRatio: 3.0,
-                          viewportFraction: 1,
-                        ),
-                        items: imagePaths.map((String imagePath) {
-                          return Builder(
-                            builder: (BuildContext context) {
-                              return Image.asset(
-                                imagePath,
-                                fit: BoxFit.cover,
-                              );
-                            },
+        body: Stack(children: [
+      //automatic image slideshow
+      CachedNetworkImage(
+        imageUrl: "images/bgWallpaper1.jpg",
+        placeholder: (context, url) => Image.asset(
+          "images/bgWallpaper1.jpg",
+          fit: BoxFit.fill,
+        ),
+        errorWidget: (context, url, error) => const Icon(Icons.error),
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+        alignment: FractionalOffset(_animation.value, 0),
+      ),
+      SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 70, 10, 0),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  //automatic image slideshow
+                  CarouselSlider(
+                    options: CarouselOptions(
+                      height: MediaQuery.of(context).size.height /
+                          5, // Set half the screen height
+                      autoPlay: true,
+                      enlargeCenterPage: true,
+                      aspectRatio: 3.0,
+                      viewportFraction: 1,
+                    ),
+                    items: imagePaths.map((String imagePath) {
+                      return Builder(
+                        builder: (BuildContext context) {
+                          return Image.asset(
+                            imagePath,
+                            fit: BoxFit.cover,
                           );
-                        }).toList(),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.fromLTRB(0, 30, 0, 10),
+                            child: const Text(
+                              "Welcome..",
+                              style: TextStyle(
+                                  fontSize: 26,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+
+                          //Calling customTextField() function from UiHelper class taaki code kam dikhe
+                          UiHelper.customEmailPasswordTextField(
+                              _emailController, "Email", Icons.mail, false),
+                          const SizedBox(
+                            height: 10,
+                          ),
+
+                          //Calling customTextField() function from UiHelper class taaki code kam dikhe
+                          UiHelper.customEmailPasswordTextField(
+                            _passwordController,
+                            "Password",
+                            Icons.lock,
+                            true,
+                          ),
+
+                          Container(
+                            alignment: Alignment.topRight,
+                            margin: const EdgeInsets.symmetric(vertical: 20),
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.pushReplacementNamed(
+                                    context, "/ForgetPasswordScreen");
+                              },
+                              child: const Text(
+                                "Forget Password?",
+                                style: TextStyle(
+                                    color: Colors.blueAccent,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18),
+                              ),
+                            ),
+                          ),
+                          Row(
                             children: [
-                              Container(
-                                margin: const EdgeInsets.fromLTRB(0, 30, 0, 10),
+                              Expanded(
+                                  child: ElevatedButton(
+                                      onPressed: () {
+                                        validateEmpty(
+                                            _emailController.text.toString(),
+                                            _passwordController.text
+                                                .toString());
+                                      },
+                                      child: const Text("Login"))),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Don't have an account",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pushReplacementNamed(
+                                      context, "/SignUpScreen");
+                                },
                                 child: const Text(
-                                  "Welcome..",
+                                  "SignUp",
                                   style: TextStyle(
-                                      fontSize: 26,
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.bold),
+                                      color: Colors.blueAccent,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18),
                                 ),
                               ),
-
-                              //Calling customTextField() function from UiHelper class taaki code kam dikhe
-                              UiHelper.customTextField(
-                                  _emailController, "Email", Icons.mail, false),
-                              const SizedBox(
-                                height: 10,
-                              ),
-
-                              //Calling customTextField() function from UiHelper class taaki code kam dikhe
-                              UiHelper.customTextField(_passwordController,
-                                  "Password", Icons.lock, true),
-
-                              Container(
-                                alignment: Alignment.topRight,
-                                margin:
-                                    const EdgeInsets.symmetric(vertical: 20),
-                                child: TextButton(
-                                  onPressed: () {
-                                    Navigator.pushReplacementNamed(
-                                        context, "/ForgetPasswordScreen");
-                                  },
-                                  child: const Text(
-                                    "Forget Password?",
-                                    style: TextStyle(
-                                        color: Colors.blueAccent,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18),
-                                  ),
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                      child: ElevatedButton(
-                                          onPressed: () {
-                                            validateEmpty(
-                                                _emailController.text
-                                                    .toString(),
-                                                _passwordController.text
-                                                    .toString());
-                                          },
-                                          child: const Text("Login"))),
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Text(
-                                    "Don't have an account",
-                                    style: TextStyle(
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16),
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pushReplacementNamed(
-                                          context, "/SignUpScreen");
-                                    },
-                                    child: const Text(
-                                      "SignUp",
-                                      style: TextStyle(
-                                          color: Colors.blueAccent,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ]),
-                      ),
-                    ]),
-              ),
-            ),
-          )),
-    ));
+                            ],
+                          ),
+                        ]),
+                  ),
+                ]),
+          ),
+        ),
+      ),
+    ]));
   }
 
   Future<void> logIn(String email, String password) async {
@@ -196,10 +222,10 @@ class _LoginScreenState extends State<LoginScreen>
   void validateEmpty(String email, String password) {
     if (email == "") {
       UiHelper.showSnackbar(context, "Enter your email id");
-    } else if (password == "") {
-      UiHelper.showSnackbar(context, "Enter Password");
     } else if (!isValidEmail(email)) {
       UiHelper.showSnackbar(context, "Enter valid email");
+    } else if (password == "") {
+      UiHelper.showSnackbar(context, "Enter Password");
     } else {
       logIn(_emailController.text.toString(),
           _passwordController.text.toString());
@@ -209,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen>
   //Checking email format
   bool isValidEmail(String email) {
     // Regular expression for a simple email validation
-    String emailRegex = r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$';
+    String emailRegex = r'^[a-zA-Z_]+[\w-]*@(gmail\.)+[com]';
     RegExp regex = RegExp(emailRegex);
     return regex.hasMatch(email);
   }
