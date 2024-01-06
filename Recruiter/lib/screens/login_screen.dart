@@ -37,6 +37,11 @@ class _LoginScreenState extends State<LoginScreen>
             }
           });
     _animationController.forward();
+    // setState(() {
+    //   if (_mAuth.currentUser != null) {
+    //     Navigator.pushReplacementNamed(context, "/HomeScreen");
+    //   }
+    // });
     super.initState();
   }
 
@@ -148,16 +153,16 @@ class _LoginScreenState extends State<LoginScreen>
                             ),
                           ),
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Expanded(
-                                  child: ElevatedButton(
-                                      onPressed: () {
-                                        validateEmpty(
-                                            _emailController.text.toString(),
-                                            _passwordController.text
-                                                .toString());
-                                      },
-                                      child: const Text("Login"))),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    validateEmpty(
+                                        _emailController.text.toString(),
+                                        _passwordController.text.toString());
+                                  },
+                                  child: const Text("Login")),
                             ],
                           ),
                           const SizedBox(

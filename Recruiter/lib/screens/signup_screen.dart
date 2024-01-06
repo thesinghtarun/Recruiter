@@ -1,7 +1,12 @@
-import 'package:carousel_slider/carousel_slider.dart';
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:recruiter/helper/ui_helper.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -54,6 +59,8 @@ class _SignUpScreenState extends State<SignUpScreen>
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
   String loginUrlImage = 'images/bgWallpaper1.jpg';
+  String? _image;
+  final ImagePicker picker = ImagePicker();
 
   //creating firebaseAuth instance
   final FirebaseAuth _mAuth = FirebaseAuth.instance;
@@ -81,26 +88,54 @@ class _SignUpScreenState extends State<SignUpScreen>
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      //automatic image slideshow
-                      CarouselSlider(
-                        options: CarouselOptions(
-                          height: MediaQuery.of(context).size.height /
-                              6, // Set half the screen height
-                          autoPlay: true,
-                          enlargeCenterPage: true,
-                          aspectRatio: 2.0,
-                          viewportFraction: 0.6,
-                        ),
-                        items: imagePaths.map((String imagePath) {
-                          return Builder(
-                            builder: (BuildContext context) {
-                              return Image.asset(
-                                imagePath,
-                                fit: BoxFit.cover,
-                              );
-                            },
-                          );
-                        }).toList(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Stack(
+                            children: [
+                              _image == null
+                                  ? Image.asset(
+                                      "images/man.png",
+                                      height: 150,
+                                      width: 150,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : ClipRRect(
+                                      borderRadius: BorderRadius.circular(75),
+                                      child: CachedNetworkImage(
+                                        imageUrl: _image!,
+                                        // Assuming _image is a valid URL
+                                        height: 150,
+                                        width: 150,
+                                        fit: BoxFit.cover,
+                                        errorWidget: (context, url, error) =>
+                                            const CircleAvatar(
+                                          child: Icon(Icons.person),
+                                        ),
+                                      ),
+                                    ),
+                              Positioned(
+                                right: 0,
+                                bottom: 5,
+                                child: ElevatedButton(
+                                    onPressed: () {
+                                      _getImage();
+                                    },
+                                    style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              Colors.transparent),
+                                    ),
+                                    child: const Icon(Icons.camera)),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(
+                        height: 10,
                       ),
 
                       //Calling customTextField() function from UiHelper class taaki code kam dikhe
@@ -139,26 +174,24 @@ class _SignUpScreenState extends State<SignUpScreen>
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Expanded(
-                                child: ElevatedButton(
-
-                                    //Calling signUp method to create user in firebase authentication
-                                    onPressed: () {
-                                      validateTextField(
-                                        _nameController.text.toString().trim(),
-                                        _emailController.text
-                                            .toString()
-                                            .toLowerCase()
-                                            .trim(),
-                                        _passwordController.text
-                                            .toString()
-                                            .trim(),
-                                        _phoneController.text.toString().trim(),
-                                        _cityController.text.toString().trim(),
-                                      );
-                                    },
-                                    child: const Text("Sign Up"))),
+                            ElevatedButton(
+                                //Calling signUp method to create user in firebase authentication
+                                onPressed: () {
+                                  validateTextField(
+                                    _nameController.text.toString().trim(),
+                                    _emailController.text
+                                        .toString()
+                                        .toLowerCase()
+                                        .trim(),
+                                    _passwordController.text.toString().trim(),
+                                    _phoneController.text.toString().trim(),
+                                    _cityController.text.toString().trim(),
+                                  );
+                                },
+                                child: const Text("Sign Up")),
                           ],
                         ),
                       ),
@@ -260,5 +293,24 @@ class _SignUpScreenState extends State<SignUpScreen>
     }).catchError((error) {
       UiHelper.showSnackbar(context, error.toString());
     });
+  }
+
+  //Select Image
+  Future _getImage() async {
+    final XFile? profileImage =
+        await picker.pickImage(source: ImageSource.gallery);
+    setState(() async {
+      if (profileImage != null) {
+        _image = (profileImage.path);
+      }
+    });
+  }
+
+  //To get current date
+  String getCurrentDate() {
+    DateTime currentDate = DateTime.now();
+    String formattedDate =
+        "${currentDate.year}-${currentDate.month}-${currentDate.day}";
+    return formattedDate;
   }
 }

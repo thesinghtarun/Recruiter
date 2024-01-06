@@ -17,10 +17,20 @@ class _ProfileState extends State<Profile> {
   final FirebaseAuth _mAuth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color.fromARGB(255, 191, 210, 242),
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 191, 210, 242),
       body: Center(
-        child: Text("Profile"),
+        child: Column(
+          children: [
+            const Text("Profile"),
+            ElevatedButton(
+                onPressed: () {
+                  _mAuth.signOut();
+                  Navigator.pushReplacementNamed(context, "/");
+                },
+                child: const Text("Logout")),
+          ],
+        ),
       ),
     );
   }

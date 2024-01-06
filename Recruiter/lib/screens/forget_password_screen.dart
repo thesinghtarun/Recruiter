@@ -99,13 +99,14 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen>
                   height: 20,
                 ),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Expanded(
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              validateEmpty(_emailController.text);
-                            },
-                            child: const Text("Reset Password"))),
+                    ElevatedButton(
+                        onPressed: () async {
+                          validateEmpty(_emailController.text);
+                        },
+                        child: const Text("Reset Password")),
                   ],
                 ),
                 const SizedBox(

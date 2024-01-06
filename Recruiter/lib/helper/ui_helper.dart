@@ -14,7 +14,7 @@ class UiHelper {
         labelText: text,
         prefixIcon: Icon(iconData),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(10),
         ),
         filled: true,
         fillColor: const Color.fromARGB(127, 124, 180, 199),
@@ -32,7 +32,7 @@ class UiHelper {
         labelText: text,
         prefixIcon: Icon(iconData),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(10),
         ),
         filled: true,
         fillColor: const Color.fromARGB(127, 124, 180, 199),
@@ -52,7 +52,7 @@ class UiHelper {
         labelText: text,
         prefixIcon: Icon(iconData),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(10),
         ),
         filled: true,
         fillColor: const Color.fromARGB(127, 124, 180, 199),
